@@ -14,7 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Bad Web Report',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        
+        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 63, 63, 63)),
         useMaterial3: true,
         materialTapTargetSize: MaterialTapTargetSize.padded,
         visualDensity: VisualDensity.standard,

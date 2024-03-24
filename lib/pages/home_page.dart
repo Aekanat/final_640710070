@@ -16,6 +16,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<webItem> _webItems = [];
+  final TextEditingController _URL = TextEditingController();
+  final TextEditingController _Details = TextEditingController();
+  String selectedWebID = '';
+  int selectedIndex = -1;
 
   @override
   void initState() {
@@ -39,8 +43,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var textTheme = Theme.of(context).textTheme;
-    final TextEditingController _URL = TextEditingController();
-    final TextEditingController _Details = TextEditingController();
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -68,21 +71,28 @@ class _HomePageState extends State<HomePage> {
                 itemCount: _webItems.length,
                 itemBuilder: (context, index) {
                   final item = _webItems[index];
-                  return Card(
-                    child: ListTile(
-                      leading: item.imageURL.isEmpty
-                          ? null
-                          : Image.network(
-                              ApiCaller.host + item.imageURL,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.error,
-                                  color: Colors.red,
-                                );
-                              },
-                            ),
-                      title: Text(item.title),
-                      subtitle: Text(item.subtitle),
+                  return GestureDetector(
+                    onTap: () {
+                      _selectedItems(index, item.webID);
+                    },
+                    child: Card(
+                      color: index == selectedIndex ? Colors.blue.withOpacity(0.5) : null,
+                      child: ListTile(
+                        leading: item.imageURL.isEmpty
+                            ? null
+                            : Image.network(
+                                ApiCaller.host + item.imageURL,
+                                errorBuilder:
+                                    (context, error, stackTrace) {
+                                  return Icon(
+                                    Icons.error,
+                                    color: Colors.red,
+                                  );
+                                },
+                              ),
+                        title: Text(item.title),
+                        subtitle: Text(item.subtitle),
+                      ),
                     ),
                   );
                 },
@@ -93,7 +103,7 @@ class _HomePageState extends State<HomePage> {
             // ปุ่มทดสอบ POST API
             ElevatedButton(
               onPressed: _handleApiPost,
-              child: const Text('Test POST API'),
+              child: const Text('Sent Information'),
             ),
 
             const SizedBox(height: 8.0),
@@ -111,19 +121,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _handleApiPost() async {
     try {
-      final data = await ApiCaller().post(
-        "web_types",
-        params: {
-          "webgId": "aaa",
-          "title": "ทดสอบๆๆๆๆๆๆๆๆๆๆๆๆๆๆ",
-          "completed": true,
-        },
-      );
-      // API นี้จะส่งข้อมูลที่เรา post ไป กลับมาเป็น JSON object ดังนั้นต้องใช้ Map รับค่าจาก jsonDecode()
-      Map map = jsonDecode(data);
-      String text =
-          'ส่งข้อมูลสำเร็จ\n\n - id: ${map['id']} \n - userId: ${map['userId']} \n - title: ${map['title']} \n - completed: ${map['completed']}';
-      showOkDialog(context: context, title: "Success", message: text);
+      setState(() {
+      selectedIndex = (selectedIndex + 1) % _webItems.length;
+    });
     } on Exception catch (e) {
       showOkDialog(context: context, title: "Error", message: e.toString());
     }
@@ -135,5 +135,12 @@ class _HomePageState extends State<HomePage> {
       title: "This is a title",
       message: "This is a message",
     );
+  }
+
+  void _selectedItems(int index,String ID) {
+    setState(() {
+      selectedIndex = index;
+      selectedWebID = ID;
+    });
   }
 }
