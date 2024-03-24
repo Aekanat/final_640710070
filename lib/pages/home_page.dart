@@ -6,6 +6,7 @@ import '../helpers/api_caller.dart';
 import '../helpers/dialog_utils.dart';
 import '../models/webItems.dart';
 import '../helpers/my_text_field.dart';
+import '../helpers/my_list_tile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,8 +19,7 @@ class _HomePageState extends State<HomePage> {
   List<webItem> _webItems = [];
   final TextEditingController _URL = TextEditingController();
   final TextEditingController _Details = TextEditingController();
-  String selectedWebID = '';
-  int selectedIndex = -1;
+  int _selectedIndex = -1;
 
   @override
   void initState() {
@@ -71,29 +71,12 @@ class _HomePageState extends State<HomePage> {
                 itemCount: _webItems.length,
                 itemBuilder: (context, index) {
                   final item = _webItems[index];
-                  return GestureDetector(
-                    onTap: () {
-                      _selectedItems(index, item.webID);
-                    },
-                    child: Card(
-                      color: index == selectedIndex ? Colors.blue.withOpacity(0.5) : null,
-                      child: ListTile(
-                        leading: item.imageURL.isEmpty
-                            ? null
-                            : Image.network(
-                                ApiCaller.host + item.imageURL,
-                                errorBuilder:
-                                    (context, error, stackTrace) {
-                                  return Icon(
-                                    Icons.error,
-                                    color: Colors.red,
-                                  );
-                                },
-                              ),
-                        title: Text(item.title),
-                        subtitle: Text(item.subtitle),
-                      ),
-                    ),
+                  return MyListTile(
+                    title: item.title,
+                    subtitle: item.subtitle,
+                    imageUrl: ApiCaller.host+item.imageURL,
+                    selected: _selectedIndex == index,
+                    onTap: () => _selectedItems(index, item.webID),
                   );
                 },
               ),
@@ -107,12 +90,6 @@ class _HomePageState extends State<HomePage> {
             ),
 
             const SizedBox(height: 8.0),
-
-            // ปุ่มทดสอบ OK Dialog
-            ElevatedButton(
-              onPressed: _handleShowDialog,
-              child: const Text('Show OK Dialog'),
-            ),
           ],
         ),
       ),
@@ -121,9 +98,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _handleApiPost() async {
     try {
-      setState(() {
-      selectedIndex = (selectedIndex + 1) % _webItems.length;
-    });
     } on Exception catch (e) {
       showOkDialog(context: context, title: "Error", message: e.toString());
     }
@@ -139,8 +113,7 @@ class _HomePageState extends State<HomePage> {
 
   void _selectedItems(int index,String ID) {
     setState(() {
-      selectedIndex = index;
-      selectedWebID = ID;
+      _selectedIndex = index;
     });
   }
 }
